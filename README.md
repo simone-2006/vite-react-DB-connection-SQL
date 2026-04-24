@@ -4,13 +4,13 @@ Template full-stack per progetti con React frontend e Express backend collegato 
 
 ## Stack
 
-| Layer | Tecnologia |
-|-------|-----------|
-| Frontend | React 19, Vite 8 |
-| Styling | Tailwind CSS 4, MUI 9, Emotion |
-| Icone | React Icons |
-| Backend | Express 5 |
-| Database | SQL Server (mssql) |
+| Layer    | Tecnologia                     |
+| -------- | ------------------------------ |
+| Frontend | React 19, Vite 8               |
+| Styling  | Tailwind CSS 4, MUI 9, Emotion |
+| Icone    | React Icons                    |
+| Backend  | Express 5                      |
+| Database | SQL Server (mssql)             |
 
 ## Struttura
 
@@ -88,7 +88,8 @@ router.get("/:id", async (req, res) => {
     const request = pool.request();
     request.input("id", sql.Int, req.params.id);
     const result = await request.query("SELECT * FROM PRODOTTI WHERE ID = @id");
-    if (!result.recordset[0]) return res.status(404).json({ status: "error", error: "Non trovato" });
+    if (!result.recordset[0])
+      return res.status(404).json({ status: "error", error: "Non trovato" });
     res.json({ status: "success", data: result.recordset[0] });
   } catch (err) {
     res.status(500).json({ status: "error", error: err.message });
@@ -109,7 +110,58 @@ app.use("/api/products", productsRouter);
 
 ```js
 export class ProductsService {
-  static getAll()     { return ApiService.get("/products"); }
-  static getById(id)  { return ApiService.get(`/products/${id}`); }
+  static getAll() {
+    return ApiService.get("/products");
+  }
+  static getById(id) {
+    return ApiService.get(`/products/${id}`);
+  }
+}
+```
+
+### come chiamare l'api nel frontend
+
+Per chiamare l'API dal frontend, utilizza il servizio `ApiService` definito in `src/services/api.js`. Assicurati che `ApiService` sia configurato per puntare al backend (ad esempio, `http://localhost:5000/api`).
+
+Esempio di utilizzo:
+
+```js
+import { ProductsService } from "./services/api.js";
+
+// Ottieni tutti i prodotti
+const products = await ProductsService.getAll();
+
+// Ottieni un prodotto specifico per ID
+const product = await ProductsService.getById(1);
+```
+
+Nel componente React, puoi usare `useEffect` per chiamare l'API al caricamento:
+
+```jsx
+import { useEffect, useState } from "react";
+import { ProductsService } from "../services/api.js";
+
+function ProductsList() {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await ProductsService.getAll();
+        setProducts(data);
+      } catch (error) {
+        console.error("Errore nel caricamento dei prodotti:", error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  return (
+    <div>
+      {products.map((product) => (
+        <div key={product.id}>{product.name}</div>
+      ))}
+    </div>
+  );
 }
 ```
