@@ -113,5 +113,3 @@ export class ProductsService {
   static getById(id)  { return ApiService.get(`/products/${id}`); }
 }
 ```
-
-Endpoint disponibili: `GET /api/products`, `GET /api/products/:id`.
