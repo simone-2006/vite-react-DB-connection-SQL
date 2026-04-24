@@ -23,7 +23,7 @@ export default function App() {
                 >
                   README.md
                 </a>{" "}
-                to get started.
+                to get started. Or edit src/App.jsx to see changes.
               </p>
             </CardContent>
           </Card>
