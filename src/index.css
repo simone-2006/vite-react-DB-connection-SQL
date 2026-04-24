@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+  --primary-100: #E0F2FE;
+  --primary-200: #BAE6FD;
+  --primary-300: #7DD3FC;
+  --primary-400: #38BDF8;
+  --primary-500: #0EA5E9;
+  --primary-600: #0284C7;
+  --primary-700: #0369A1;
+  --primary-800: #075985;
+  --primary-900: #0C4A6E;
+}
