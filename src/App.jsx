@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
 import styled from "@emotion/styled";
 import {
-  Button,
   Card,
   CardContent,
-  CardHeader,
-  Chip,
   Container,
 } from "@mui/material";
 import { FiCheck, FiX } from "react-icons/fi";
