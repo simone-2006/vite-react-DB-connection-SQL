@@ -1,2 +1,0 @@
-ASSETS:
-Images, fonts, icon and other static assets
