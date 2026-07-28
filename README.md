@@ -1,22 +1,22 @@
 # React + Vite + Express + SQL Server Template
 
-Template full-stack per progetti con React frontend e Express backend collegato a SQL Server.
+A full-stack template for projects using a React frontend and an Express backend connected to SQL Server.
 
 ## Stack
 
-| Layer    | Tecnologia                     |
-| -------- | ------------------------------ |
-| Frontend | React 19, Vite 8               |
-| Styling  | Tailwind CSS 4, MUI 9, Emotion |
-| Icone    | React Icons                    |
-| Backend  | Express 5                      |
-| Database | SQL Server (mssql)             |
+| Layer      | Technology                     |
+| ----------- | ------------------------------ |
+| Frontend    | React 19, Vite 8               |
+| Styling     | Tailwind CSS 4, MUI 9, Emotion |
+| Icons       | React Icons                    |
+| Backend     | Express 5                      |
+| Database    | SQL Server (mssql)             |
 
-## Struttura
+## Project Structure
 
 ```
-├── server.js          # Setup Express + mounting delle route
-├── db.js              # Connection pool SQL Server (singleton)
+├── server.js          # Express setup and route mounting
+├── db.js              # SQL Server connection pool (singleton)
 ├── routes/
 │   ├── health.js      # GET /api/test, /api/health
 │   └── tables.js      # GET /api/db-test, /api/tables
@@ -24,47 +24,47 @@ Template full-stack per progetti con React frontend e Express backend collegato 
     ├── App.jsx
     ├── components/
     ├── services/
-    │   └── api.js     # Client HTTP verso il backend
+    │   └── api.js     # HTTP client for the backend
     └── pages/
 ```
 
 ## Setup
 
-### 1. Installa le dipendenze
+### 1. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Configura il database
+### 2. Configure the database
 
-Copia `.env.example` in `.env` e compila con i tuoi dati:
+Copy `.env.example` to `.env` and fill in your database credentials:
 
 ```env
 PORT=5000
 DB_USER=sa
 DB_PASSWORD=password
 DB_SERVER=localhost
-DB_NAME=NomeDatabase
+DB_NAME=DatabaseName
 DB_PORT=1433
 DB_ENCRYPT=false
 DB_TRUST_CERT=true
 ```
 
-### 3. Avvia
+### 3. Start the application
 
 ```bash
-# Frontend e backend insieme
+# Run frontend and backend together
 npm run dev:all
 
-# Oppure separati
+# Or run them separately
 npm run dev      # Vite → http://localhost:5173
 npm run server   # Express → http://localhost:5000
 ```
 
-## Aggiungere una nuova route
+## Adding a New Route
 
-### 1. Crea `routes/products.js`
+### 1. Create `routes/products.js`
 
 ```js
 import { Router } from "express";
@@ -75,7 +75,7 @@ const router = Router();
 router.get("/", async (req, res) => {
   try {
     const pool = await getPool();
-    const result = await pool.request().query("SELECT * FROM PRODOTTI");
+    const result = await pool.request().query("SELECT * FROM PRODUCTS");
     res.json({ status: "success", data: result.recordset });
   } catch (err) {
     res.status(500).json({ status: "error", error: err.message });
@@ -87,9 +87,17 @@ router.get("/:id", async (req, res) => {
     const pool = await getPool();
     const request = pool.request();
     request.input("id", sql.Int, req.params.id);
-    const result = await request.query("SELECT * FROM PRODOTTI WHERE ID = @id");
-    if (!result.recordset[0])
-      return res.status(404).json({ status: "error", error: "Non trovato" });
+
+    const result = await request.query(
+      "SELECT * FROM PRODUCTS WHERE ID = @id"
+    );
+
+    if (!result.recordset[0]) {
+      return res
+        .status(404)
+        .json({ status: "error", error: "Not found" });
+    }
+
     res.json({ status: "success", data: result.recordset[0] });
   } catch (err) {
     res.status(500).json({ status: "error", error: err.message });
@@ -99,43 +107,45 @@ router.get("/:id", async (req, res) => {
 export default router;
 ```
 
-### 2. Registra in `server.js`
+### 2. Register the route in `server.js`
 
 ```js
 import productsRouter from "./routes/products.js";
+
 app.use("/api/products", productsRouter);
 ```
 
-### 3. Aggiungi il service frontend in `src/services/api.js`
+### 3. Add the frontend service in `src/services/api.js`
 
 ```js
 export class ProductsService {
   static getAll() {
     return ApiService.get("/products");
   }
+
   static getById(id) {
     return ApiService.get(`/products/${id}`);
   }
 }
 ```
 
-### come chiamare l'api nel frontend
+## Calling the API from the Frontend
 
-Per chiamare l'API dal frontend, utilizza il servizio `ApiService` definito in `src/services/api.js`. Assicurati che `ApiService` sia configurato per puntare al backend (ad esempio, `http://localhost:5000/api`).
+To call the API from the frontend, use the `ApiService` defined in `src/services/api.js`. Make sure it is configured to point to your backend (for example, `http://localhost:5000/api`).
 
-Esempio di utilizzo:
+Example usage:
 
 ```js
 import { ProductsService } from "./services/api.js";
 
-// Ottieni tutti i prodotti
+// Get all products
 const products = await ProductsService.getAll();
 
-// Ottieni un prodotto specifico per ID
+// Get a specific product by ID
 const product = await ProductsService.getById(1);
 ```
 
-Nel componente React, puoi usare `useEffect` per chiamare l'API al caricamento:
+Inside a React component, you can use `useEffect` to fetch data when the component mounts:
 
 ```jsx
 import { useEffect, useState } from "react";
@@ -150,9 +160,10 @@ function ProductsList() {
         const data = await ProductsService.getAll();
         setProducts(data);
       } catch (error) {
-        console.error("Errore nel caricamento dei prodotti:", error);
+        console.error("Error loading products:", error);
       }
     };
+
     fetchProducts();
   }, []);
 
